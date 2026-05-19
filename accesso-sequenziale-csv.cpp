@@ -3,17 +3,30 @@
 #include <fstream>
 using namespace std;
 
-void Aggiungi(){
-	
+bool Aggiungi(){
+	ifstream leggi("Comune_Bergamo_-_Numerazione_civica.csv");
+	ofstream scrivi("file2.csv");
+	//copio nel nuovo file
+	string riga;
+	if(leggi.is_open()){
+		while(!leggi.eof()){
+			getline(leggi, riga);
+			scrivi<<riga<<endl;
+		}
+    }
+    else{
+    	return false;
+	}
+	return true;
 }
 
-bool Modifica(){
+//bool Modifica(){
 	
-}
+//}
 
-bool Cancella(){
+//bool Cancella(){
 	
-}
+//}
 
 int main() {
 	int opzione;
