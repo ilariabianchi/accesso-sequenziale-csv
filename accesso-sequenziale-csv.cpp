@@ -88,12 +88,12 @@ bool Aggiungi(string classe, string descrizione, string numero, string subaltern
 
 int main() {
 	int opzione;
-	NumerazioneCivica dati[1000];
-	NumerazioneCivica via;
+	NumerazioneCivica dati[10];
+	NumerazioneCivica via, nuovo, cerca;
 	int d=sizeof(dati)/sizeof(dati[0]);
 	
     do{
-        cout<<"APPLICAZIONE CSV\n1 - carica dati\n2 - visualizza file\n3 - modifica\n4 - cancella\n5 - inserisci\n0 - stop";
+        cout<<"APPLICAZIONE CSV\n1 - carica dati\n2 - inserisci\n3 - modifica\n4 - cancella\n5 - visualizza\n0 - stop";
         cout<<"\nopzione: ";
         cin>>opzione;
         
