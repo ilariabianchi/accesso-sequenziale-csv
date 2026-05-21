@@ -1,175 +1,148 @@
 #include <iostream>
 #include <string>
+//lettura/scrittura
 #include <fstream>
-//per convertire in maiuscolo
+//maiuscolo
 #include <algorithm>
 #include <cctype>
+//rename/remove
+#include <cstdio>
 using namespace std;
-
-struct Location {
-    double latitudine1;
-    double longitudine1;
-};
-
-struct NumerazioneCivica {
-    string classe;
-    string descrizione;
-    string numero;
-    string subalterno;
-    string cap;
-    string istat;
-    double latitudine;
-    double longitudine;
-    Location posto;
-};
-
-bool CaricaDati(NumerazioneCivica v[], int righe_tot){
-	//apro il file
-    ifstream leggi("Comune_Bergamo_-_Numerazione_civica.csv");
-    //se il file non è aperto, ritorno falso
-    if(!leggi.is_open()) {
-        return false;
-    }
-    string riga, dati;
-    //salto la prima riga di intestazione
-    getline(leggi, riga);
-    int i=0;
-    //controllo che il ciclo si ripeta per il numero delle righe e che non sia alla fine del file
-    while (i<righe_tot && !leggi.eof()){
-    	//leggo il primo campo della riga e se siamo già alal fine del file esco dal ciclo
-        getline(leggi, v[i].classe, ',');
-        if(leggi.eof()){
-        	break;	
-		}
-		//leggo gli altri campi separati dalla virgola
-        getline(leggi, v[i].descrizione, ',');
-        getline(leggi, v[i].numero, ',');
-        getline(leggi, v[i].subalterno, ',');
-        getline(leggi, v[i].cap, ',');
-        getline(leggi, v[i].istat, ',');
-		//converto da stringa a double
-        getline(leggi, dati, ',');
-        v[i].latitudine=stod(dati);
-		//alla fine della riga si va a capo e la virgola non c'è più
-        getline(leggi, dati, '\n');
-        v[i].longitudine=stod(dati);
-		//copio gli stessi valori latitudine e longitudine in Location
-        v[i].posto.latitudine1=v[i].latitudine;
-        v[i].posto.longitudine1=v[i].longitudine;
-        i++;
-    }
-	//chiudo il file
-    leggi.close();
-    return true;
-}
 
 bool Aggiungi(string classe, string descrizione, string numero, string subalterno, string cap, string istat, double longit, double lat){
 	ifstream leggi("Comune_Bergamo_-_Numerazione_civica.csv");
+	//aggiungo in coda
 	ofstream scrivi("file2.csv", ios::app);
-	//copio nel nuovo file
 	string riga;
 	if(!scrivi.is_open()){
 		return false;
 	}
+	//copio tutte le righe
 	if(leggi.is_open()){
-		while(!leggi.eof()){
-			getline(leggi, riga);
-			scrivi<<riga<<endl;
+		while(getline(leggi, riga)){
+			scrivi<<riga<<"\n";
 		}
-    }
-    scrivi<<classe<<","<<descrizione<<","<<numero<<","<<subalterno<<","<<cap<<","<<istat<<","<<longit<<","<<lat<<",\"("<<longit<<","<<lat<<")\""<<endl;
+	}
+	//aggiungo l'elemento
+	scrivi<<classe<<","<<descrizione<<","<<numero<<","<<subalterno<<","<<cap<<","<<istat<<","<<longit<<","<<lat<<",\"("<<longit<<","<<lat<<")\""<<"\n";
+	//chiudo
 	leggi.close();
 	scrivi.close();
 	return true;
 }
-int Cerca(NumerazioneCivica v[], string descrizione, string numero, int d){
-	for(int i=0; i<d; i++){
-		if(v[i].descrizione==descrizione&&v[i].numero==numero){
+
+int Cerca(string descrizione, string numero){
+	ifstream leggi("Comune_Bergamo_-_Numerazione_civica.csv");
+	string riga, classe, desc, num, resto;
+	//salto le prima riga di intestazione
+	getline(leggi, riga);
+	int i=0;
+	while(!leggi.eof()){
+		//legge la classe (il primo campo) ma non lo usa
+		getline(leggi, classe, ','); 
+		//legge la descrizione
+		getline(leggi, desc, ','); 
+		//legge numero
+		getline(leggi, num, ',');  
+		//legge ma non usa il resto della riga
+		getline(leggi, resto, '\n');  
+		if(desc==descrizione&&num==numero){
 			return i;
 		}
+		i++;
 	}
 	return -1;
 }
+
 bool Modifica(int posiz, string classe, string descrizione, string numero, string subalterno, string cap, string istat, double longit, double lat){
 	ifstream leggi("Comune_Bergamo_-_Numerazione_civica.csv");
 	ofstream scrivi("file2.csv");
 	string riga;
+	//salto l'intestazione
 	getline(leggi, riga);
-    scrivi<<riga<<endl;
+	scrivi<<riga<<"\n";
 	int i=0;
-	//copio nel nuovo file
-	
 	if(!scrivi.is_open()){
 		return false;
 	}
 	if(leggi.is_open()){
 		while(getline(leggi,riga)){
 			if(i!=posiz){
-				scrivi<<riga<<endl;		
+				//se non trovo quello che voglio modificare continuo a copiare
+				scrivi<<riga<<"\n";
 			}
 			else{
-		    scrivi<<classe<<","<<descrizione<<","<<numero<<","<<subalterno<<","<<cap<<","<<istat<<","<<longit<<","<<lat<<",\"("<<longit<<","<<lat<<")\""<<endl;
+				//quando lo trovo scrivo le riga modificata
+				scrivi<<classe<<","<<descrizione<<","<<numero<<","<<subalterno<<","<<cap<<","<<istat<<","<<longit<<","<<lat<<",\"("<<longit<<","<<lat<<")\""<<"\n";
 			}
 			i++;
 		}
-    }
+	}
 	return true;
-	
 }
 
-//bool Cancella(){
-	
-//}
-
-int main() {
-	int opzione;
-	NumerazioneCivica dati[10];
-	NumerazioneCivica via, nuovo, cerca;
-	int d=sizeof(dati)/sizeof(dati[0]);
-	
-    do{
-        cout<<"APPLICAZIONE CSV\n1 - carica dati\n2 - inserisci\n3 - modifica\n4 - cancella\n5 - visualizza\n0 - stop";
-        cout<<"\nopzione: ";
-        cin>>opzione;
-        
-        switch(opzione){
-        	
-        	case 1:{
-        		//carico i dati
-        		if(CaricaDati(dati, d)){
-                    cout<<"\ndati caricati\n\n";
-                }
-                //se i dati non vengono caricati si viene avvertiti
-                else{
-                    cout<<"\nfile non aperto\n\n";
-                }
-        		
-				break;
+bool Cancella(int posiz){
+	ifstream leggi("Comune_Bergamo_-_Numerazione_civica.csv");
+	ofstream scrivi("file2.csv");
+	string riga;
+	//salto intestazione
+	getline(leggi, riga);
+	scrivi<<riga<<"\n";
+	int i=0;
+	if(!scrivi.is_open()){
+		return false;
+	}
+	if(leggi.is_open()){
+		while(getline(leggi,riga)){
+			//finchè non trovo quello che sto cercando lo copio e quello da eliminare lo salto e non faccio nulla
+			if(i!=posiz){
+				scrivi<<riga<<"\n";
 			}
-			
-			case 2:{
-				//inserisco un nuovo elemnto
+			i++;
+		}
+	}
+	return true;
+}
+
+int main(){
+	int opzione;
+	string classe, descrizione, numero, subalterno, cap, istat;
+	double latitudine, longitudine;
+
+	do{
+		cout<<"APPLICAZIONE CSV\n1 - inserisci\n2 - modifica\n3 - cancella\n0 - stop";
+		cout<<"\nopzione: ";
+		cin>>opzione;
+
+		switch(opzione){
+
+			case 1:{
+				//inserisco i campi del nuovo elemento
 				cout<<"\ninserisci i dati della via che vuoi aggiungere:\n";
 				fflush(stdin);
 				cout<<"classe: ";
-				getline(cin, via.classe);
+				getline(cin, classe);
 				cout<<"descrizione: ";
-				getline(cin, via.descrizione);
+				getline(cin, descrizione);
 				cout<<"numero: ";
-				getline(cin, via.numero);
+				getline(cin, numero);
 				cout<<"subalterno: ";
-				getline(cin, via.subalterno);
+				getline(cin, subalterno);
 				cout<<"cap: ";
-				getline(cin, via.cap);
+				getline(cin, cap);
 				cout<<"istat: ";
-				getline(cin, via.istat);
+				getline(cin, istat);
 				cout<<"latitudine: ";
-				cin>>via.latitudine;
+				cin>>latitudine;
 				cout<<"longitudine: ";
-				cin>>via.longitudine;
+				cin>>longitudine;
 				fflush(stdin);
-				bool inserisci=Aggiungi(via.classe, via.descrizione, via.numero, via.subalterno, via.cap, via.istat, via.longitudine, via.latitudine);
+				//chiamo la funzione
+				bool inserisci=Aggiungi(classe, descrizione, numero, subalterno, cap, istat, longitudine, latitudine);
 				if(inserisci){
+					//cancello il vecchio file e rinomino il nuovo
+					remove("Comune_Bergamo_-_Numerazione_civica.csv");
+					rename("file2.csv", "Comune_Bergamo_-_Numerazione_civica.csv");
 					cout<<"\nelemento aggiunto\n\n";
 				}
 				else{
@@ -177,62 +150,98 @@ int main() {
 				}
 				break;
 			}
-			
-			case 3:{
-				//modifico un elemento
+
+			case 2:{
 				fflush(stdin);
-				cout<<"\ninserisci i dati della via da cercare:\n";
+				cout<<"\ninserisci i dati della via da modificare:\n";
 				cout<<"descrizione: ";
-				getline(cin, via.descrizione);
-				transform(via.descrizione.begin(), via.descrizione.end(), via.descrizione.begin(), [](unsigned char c){
-        			return toupper(c);
-    			});
+				getline(cin, descrizione);
+				//maiuscolo
+				transform(descrizione.begin(), descrizione.end(), descrizione.begin(), [](unsigned char c){
+					return toupper(c);
+				});
 				cout<<"numero: ";
-				getline(cin, via.numero);
-				transform(via.numero.begin(), via.numero.end(), via.numero.begin(), [](unsigned char c){
-        			return toupper(c);
-    			});
-				int posiz=Cerca(dati, via.descrizione, via.numero, d);
+				getline(cin, numero);
+				//maiuscolo
+				transform(numero.begin(), numero.end(), numero.begin(), [](unsigned char c){
+					return toupper(c);
+				});
+				//cerco nel file se la via è presente
+				int posiz=Cerca(descrizione, numero);
 				if(posiz!=-1){
 					cout<<"\ninserisci i dati modificati:\n";
 					fflush(stdin);
 					cout<<"classe: ";
-					getline(cin, via.classe);
+					getline(cin, classe);
 					cout<<"descrizione: ";
-					getline(cin, via.descrizione);
+					getline(cin, descrizione);
 					cout<<"numero: ";
-					getline(cin, via.numero);
+					getline(cin, numero);
 					cout<<"subalterno: ";
-					getline(cin, via.subalterno);
+					getline(cin, subalterno);
 					cout<<"cap: ";
-					getline(cin, via.cap);
+					getline(cin, cap);
 					cout<<"istat: ";
-					getline(cin, via.istat);
+					getline(cin, istat);
 					cout<<"latitudine: ";
-					cin>>via.latitudine;
+					cin>>latitudine;
 					cout<<"longitudine: ";
-					cin>>via.longitudine;
+					cin>>longitudine;
 					fflush(stdin);
-					bool mod=Modifica(posiz, via.classe, via.descrizione, via.numero, via.subalterno, via.cap, via.istat, via.longitudine, via.latitudine);
-				}
-				if(Modifica){
-					cout<<"\nmodifica avvenuta\n\n";
+					bool mod=Modifica(posiz, classe, descrizione, numero, subalterno, cap, istat, longitudine, latitudine);
+					if(mod){
+						//se va a buon fine cancello il vecchio file e rinomino il nuovo
+						remove("Comune_Bergamo_-_Numerazione_civica.csv");
+						rename("file2.csv", "Comune_Bergamo_-_Numerazione_civica.csv");
+						cout<<"\nmodifica avvenuta\n\n";
+					}
+					else{
+						cout<<"\nerrore nella modifica\n\n";
+					}
 				}
 				else{
-					cout<<"\nerrore nella modifica\n\n";
+					cout<<"\nelemento non trovato\n\n";
 				}
-				
-				
 				break;
 			}
-			
-			case 4:{
-				
+
+			case 3:{
+				fflush(stdin);
+				cout<<"\ninserisci i dati della via da cancellare:\n";
+				cout<<"descrizione: ";
+				getline(cin, descrizione);
+				//maiuscolo
+				transform(descrizione.begin(), descrizione.end(), descrizione.begin(), [](unsigned char c){
+					return toupper(c);
+				});
+				cout<<"numero: ";
+				getline(cin, numero);
+				//maiuscolo
+				transform(numero.begin(), numero.end(), numero.begin(), [](unsigned char c){
+					return toupper(c);
+				});
+				int posiz=Cerca(descrizione, numero);
+				//se lo trovo cancello
+				if(posiz!=-1){
+					bool canc=Cancella(posiz);
+					if(canc){
+						//se va tutto a buon fine cancello il file vecchio e rinomino il nuovo
+						remove("Comune_Bergamo_-_Numerazione_civica.csv");
+						rename("file2.csv", "Comune_Bergamo_-_Numerazione_civica.csv");
+						cout<<"\ncancellazione avvenuta\n\n";
+					}
+					else{
+						cout<<"\nerrore nella cancellazione\n\n";
+					}
+				}
+				else{
+					cout<<"\nelemento non trovato\n\n";
+				}
 				break;
 			}
 		}
-    }
-    while(opzione!=0);
-	
+	}
+	while(opzione!=0);
+
 	return 0;
 }
