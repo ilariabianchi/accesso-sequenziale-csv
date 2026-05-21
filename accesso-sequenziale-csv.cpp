@@ -1,6 +1,9 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+//per convertire in maiuscolo
+#include <algorithm>
+#include <cctype>
 using namespace std;
 
 struct Location {
@@ -75,12 +78,44 @@ bool Aggiungi(string classe, string descrizione, string numero, string subaltern
 		}
     }
     scrivi<<classe<<","<<descrizione<<","<<numero<<","<<subalterno<<","<<cap<<","<<istat<<","<<longit<<","<<lat<<",\"("<<longit<<","<<lat<<")\""<<endl;
+	leggi.close();
+	scrivi.close();
 	return true;
 }
-
-//bool Modifica(){
+int Cerca(NumerazioneCivica v[], string descrizione, string numero, int d){
+	for(int i=0; i<d; i++){
+		if(v[i].descrizione==descrizione&&v[i].numero==numero){
+			return i;
+		}
+	}
+	return -1;
+}
+bool Modifica(int posiz, string classe, string descrizione, string numero, string subalterno, string cap, string istat, double longit, double lat){
+	ifstream leggi("Comune_Bergamo_-_Numerazione_civica.csv");
+	ofstream scrivi("file2.csv");
+	string riga;
+	getline(leggi, riga);
+    scrivi<<riga<<endl;
+	int i=0;
+	//copio nel nuovo file
 	
-//}
+	if(!scrivi.is_open()){
+		return false;
+	}
+	if(leggi.is_open()){
+		while(getline(leggi,riga)){
+			if(i!=posiz){
+				scrivi<<riga<<endl;		
+			}
+			else{
+		    scrivi<<classe<<","<<descrizione<<","<<numero<<","<<subalterno<<","<<cap<<","<<istat<<","<<longit<<","<<lat<<",\"("<<longit<<","<<lat<<")\""<<endl;
+			}
+			i++;
+		}
+    }
+	return true;
+	
+}
 
 //bool Cancella(){
 	
@@ -100,6 +135,7 @@ int main() {
         switch(opzione){
         	
         	case 1:{
+        		//carico i dati
         		if(CaricaDati(dati, d)){
                     cout<<"\ndati caricati\n\n";
                 }
@@ -112,6 +148,7 @@ int main() {
 			}
 			
 			case 2:{
+				//inserisco un nuovo elemnto
 				cout<<"\ninserisci i dati della via che vuoi aggiungere:\n";
 				fflush(stdin);
 				cout<<"classe: ";
@@ -142,6 +179,49 @@ int main() {
 			}
 			
 			case 3:{
+				//modifico un elemento
+				fflush(stdin);
+				cout<<"\ninserisci i dati della via da cercare:\n";
+				cout<<"descrizione: ";
+				getline(cin, via.descrizione);
+				transform(via.descrizione.begin(), via.descrizione.end(), via.descrizione.begin(), [](unsigned char c){
+        			return toupper(c);
+    			});
+				cout<<"numero: ";
+				getline(cin, via.numero);
+				transform(via.numero.begin(), via.numero.end(), via.numero.begin(), [](unsigned char c){
+        			return toupper(c);
+    			});
+				int posiz=Cerca(dati, via.descrizione, via.numero, d);
+				if(posiz!=-1){
+					cout<<"\ninserisci i dati modificati:\n";
+					fflush(stdin);
+					cout<<"classe: ";
+					getline(cin, via.classe);
+					cout<<"descrizione: ";
+					getline(cin, via.descrizione);
+					cout<<"numero: ";
+					getline(cin, via.numero);
+					cout<<"subalterno: ";
+					getline(cin, via.subalterno);
+					cout<<"cap: ";
+					getline(cin, via.cap);
+					cout<<"istat: ";
+					getline(cin, via.istat);
+					cout<<"latitudine: ";
+					cin>>via.latitudine;
+					cout<<"longitudine: ";
+					cin>>via.longitudine;
+					fflush(stdin);
+					bool mod=Modifica(posiz, via.classe, via.descrizione, via.numero, via.subalterno, via.cap, via.istat, via.longitudine, via.latitudine);
+				}
+				if(Modifica){
+					cout<<"\nmodifica avvenuta\n\n";
+				}
+				else{
+					cout<<"\nerrore nella modifica\n\n";
+				}
+				
 				
 				break;
 			}
