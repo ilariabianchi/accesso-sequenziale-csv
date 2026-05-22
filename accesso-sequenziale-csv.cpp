@@ -2,9 +2,6 @@
 #include <string>
 //lettura/scrittura
 #include <fstream>
-//maiuscolo
-#include <algorithm>
-#include <cctype>
 //rename/remove
 #include <cstdio>
 using namespace std;
@@ -51,6 +48,7 @@ int Cerca(string descrizione, string numero){
 		}
 		i++;
 	}
+	leggi.close();
 	return -1;
 }
 
@@ -78,6 +76,8 @@ bool Modifica(int posiz, string classe, string descrizione, string numero, strin
 			i++;
 		}
 	}
+	leggi.close();
+	scrivi.close();
 	return true;
 }
 
@@ -101,7 +101,17 @@ bool Cancella(int posiz){
 			i++;
 		}
 	}
+	leggi.close();
+	scrivi.close();
 	return true;
+}
+
+string Maiuscola(string s){
+	int lunghezza=s.length();
+	for(int i=0; i<lunghezza; i++){
+		s[i]=toupper(s[i]);
+	}
+	return s;
 }
 
 int main(){
@@ -157,15 +167,11 @@ int main(){
 				cout<<"descrizione: ";
 				getline(cin, descrizione);
 				//maiuscolo
-				transform(descrizione.begin(), descrizione.end(), descrizione.begin(), [](unsigned char c){
-					return toupper(c);
-				});
+				descrizione=Maiuscola(descrizione);
 				cout<<"numero: ";
 				getline(cin, numero);
 				//maiuscolo
-				transform(numero.begin(), numero.end(), numero.begin(), [](unsigned char c){
-					return toupper(c);
-				});
+				numero=Maiuscola(numero);
 				//cerco nel file se la via è presente
 				int posiz=Cerca(descrizione, numero);
 				if(posiz!=-1){
@@ -211,15 +217,11 @@ int main(){
 				cout<<"descrizione: ";
 				getline(cin, descrizione);
 				//maiuscolo
-				transform(descrizione.begin(), descrizione.end(), descrizione.begin(), [](unsigned char c){
-					return toupper(c);
-				});
-				cout<<"numero: ";
+				descrizione=Maiuscola(descrizione);
+				cout<<"numero: ";				
 				getline(cin, numero);
 				//maiuscolo
-				transform(numero.begin(), numero.end(), numero.begin(), [](unsigned char c){
-					return toupper(c);
-				});
+				numero=Maiuscola(numero);				
 				int posiz=Cerca(descrizione, numero);
 				//se lo trovo cancello
 				if(posiz!=-1){
